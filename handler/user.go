@@ -29,7 +29,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	registeredUser, err := h.userService.RegisterUser(input)
 	if err != nil {
-		if user.IsEmailExistsError(err) {
+		if helper.IsEmailExistsError(err) {
 			c.JSON(http.StatusConflict, helper.APIResponse("ailed to register account. Email is already taken.", http.StatusConflict, "error", nil))
 			return
 		}

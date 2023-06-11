@@ -1,6 +1,11 @@
 package helper
 
-import "github.com/go-playground/validator/v10"
+import (
+	"errors"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
+)
 
 type Response struct {
 	Meta Meta        `json:"meta"`
@@ -29,4 +34,25 @@ func FormatValidationError(err error) []string {
 	}
 
 	return errors
+}
+
+
+func IsEmailExistsError(err error) bool {
+	var ErrEmailExists = errors.New("email already exists")
+
+	if err == ErrEmailExists {
+		return true
+	}
+
+	if err != nil {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "duplicate key value violates unique constraint") {
+			return true
+		}
+		if strings.Contains(errMsg, "23505") {
+			return true
+		}
+	}
+
+	return false
 }
