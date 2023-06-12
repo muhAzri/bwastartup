@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/google/uuid"
 
@@ -11,6 +10,7 @@ import (
 
 type Service interface {
 	RegisterUser(input RegisterUserInput) (User, error)
+	Login(input LoginInput) (User, error)
 }
 
 type service struct {
@@ -46,23 +46,25 @@ func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
 	return newUser, nil
 }
 
-func IsEmailExistsError(err error) bool {
-	var ErrEmailExists = errors.New("email already exists")
+func (s *service) Login(input LoginInput) (User, error) {
+	email := input.Email
+	password := input.Password
 
-	if err == ErrEmailExists {
-		return true
-	}
+	user ,err := s.repository.FindByEmail(email)
 
 	if err != nil {
-		// Check the error message or code to identify the "email already exists" error
-		errMsg := err.Error()
-		if strings.Contains(errMsg, "duplicate key value violates unique constraint") {
-			return true
-		}
-		if strings.Contains(errMsg, "23505") { // Assuming SQLSTATE 23505 represents the "unique constraint violation" error
-			return true
-		}
+		return user,err
 	}
 
-	return false
+	if user.ID == "" {
+		return user, errors.New("No user found on that email address")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
