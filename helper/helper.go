@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -55,4 +56,10 @@ func IsEmailExistsError(err error) bool {
 	}
 
 	return false
+}
+
+func ErrorResponse(c *gin.Context, message string, statusCode int, errors interface{}) {
+	errorMessage := gin.H{"errors": errors}
+	response := APIResponse(message, statusCode, "error", errorMessage)
+	c.JSON(statusCode, response)
 }

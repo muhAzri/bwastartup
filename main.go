@@ -20,12 +20,6 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	// input := user.LoginInput{
-	// 	Email:    "email@domain.com",
-	// 	Password: "p@ssw0rd",
-	// }
-
-	// user, err := userService.Login(input)
 
 	userHandler := handler.NewUserHandler(userService)
 
@@ -34,6 +28,7 @@ func main() {
 
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.Login)
+	api.POST("/check-email", userHandler.CheckEmailAvailability)
 
 	router.Run()
 
